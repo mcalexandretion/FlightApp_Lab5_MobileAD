@@ -22,7 +22,7 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
     val favorites by viewModel.favorites.collectAsState()
     val selectedAirport by viewModel.selectedAirport.collectAsState()
     val isShowingFavorites by viewModel.isShowingFavorites.collectAsState()
-
+    val airportsMap = airports.associate { it.iataCode to it.name }
     val selectedAirportObj = airports.find { it.iataCode == selectedAirport }
 
     Column(
@@ -56,72 +56,11 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
         when {
             isShowingFavorites -> {
                 Text("⭐ Избранные маршруты:", style = MaterialTheme.typography.titleMedium)
-                if (favorites.isEmpty()) {
-                    Text("Нет сохранённых маршрутов.")
-                } else {
-                    LazyColumn {
-                        items(favorites) { fav ->
-                            // Находим объекты аэропортов для отображения названий
-                            val departAirport = airports.find { it.iataCode == fav.departureCode }
-                            val arriveAirport = airports.find { it.iataCode == fav.destinationCode }
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                            ) {
-                                Text("DEPART", style = MaterialTheme.typography.labelSmall)
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Start,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        departAirport?.iataCode ?: fav.departureCode,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        departAirport?.name ?: "",
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(4.dp))
-
-                                Text("ARRIVE", style = MaterialTheme.typography.labelSmall)
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Start,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        arriveAirport?.iataCode ?: fav.destinationCode,
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        arriveAirport?.name ?: "",
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-
-                                // Кнопка удаления избранного справа по центру
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    IconButton(onClick = { viewModel.removeFavorite(fav) }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Удалить")
-                                    }
-                                }
-
-                                Divider(modifier = Modifier.padding(vertical = 8.dp))
-                            }
-                        }
-                    }
-                }
+                FavoritesList(
+                    favorites = favorites,
+                    airportsMap = airportsMap,
+                    onRemoveFavorite = { fav -> viewModel.removeFavorite(fav) }
+                )
             }
 
             selectedAirport == null && query.isNotBlank() -> {
