@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.flightapp.viewmodel.FlightViewModel
 import com.example.flightapp.ui.components.FlightAppTopBar
+import com.example.flightapp.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +60,8 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
 
             when {
                 isShowingFavorites -> {
-                    Text("⭐ Избранные маршруты:", style = MaterialTheme.typography.titleMedium)
+                    Text("Избранные маршруты:", style = AppTypography.titleSmall)
+                    Spacer(modifier = Modifier.height(8.dp))
                     FavoritesList(
                         favorites = favorites,
                         airportsMap = airportsMap,
@@ -68,7 +70,7 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
                 }
 
                 selectedAirport == null && query.isNotBlank() -> {
-                    Text("Аэропорты по запросу:", style = MaterialTheme.typography.titleMedium)
+                    Text("Аэропорты по запросу:", style = AppTypography.titleSmall)
                     AirportList(
                         airports = airports,
                         onSelectAirport = {

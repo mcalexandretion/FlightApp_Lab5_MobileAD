@@ -21,10 +21,3 @@ fun SearchInput(
         singleLine = true
     )
 }
-
-@Preview(showBackground = true)
-@Composable
-fun SearchInputPreview() {
-    var text by remember { mutableStateOf("SVO") }
-    SearchInput(query = text, onQueryChange = { text = it })
-}

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import com.example.flightapp.ui.FlightSearchScreen
+import com.example.flightapp.ui.theme.FlightAppTheme
 import com.example.flightapp.viewmodel.FlightViewModel
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +14,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FlightSearchScreen(viewModel)
+            FlightAppTheme{ FlightSearchScreen(viewModel) }
         }
     }
 }

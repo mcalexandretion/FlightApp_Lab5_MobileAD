@@ -11,11 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.flightapp.models.Favorite
+import com.example.flightapp.ui.theme.AppTypography
 
 @Composable
 fun FavoritesList(
     favorites: List<Favorite>,
-    airportsMap: Map<String, String>, // Map IATA code to airport name
+    airportsMap: Map<String, String>,
     onRemoveFavorite: (Favorite) -> Unit
 ) {
     if (favorites.isEmpty()) {
@@ -32,18 +33,18 @@ fun FavoritesList(
                 ) {
                     Column {
                         Text("DEPART", style = MaterialTheme.typography.labelSmall)
-                        Text(
-                            "${fav.departureCode} - ${airportsMap[fav.departureCode] ?: "Неизвестно"}",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-
+                        Row {
+                            Text(fav.departureCode, style = AppTypography.titleLarge)
+                            Spacer(Modifier.width(8.dp))
+                            Text(airportsMap[fav.departureCode] ?: fav.departureCode)
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Text("ARRIVE", style = MaterialTheme.typography.labelSmall)
-                        Text(
-                            "${fav.destinationCode} - ${airportsMap[fav.destinationCode] ?: "Неизвестно"}",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Row {
+                            Text(fav.destinationCode, style = AppTypography.titleLarge)
+                            Spacer(Modifier.width(8.dp))
+                            Text(airportsMap[fav.destinationCode] ?: fav.destinationCode)
+                        }
                     }
 
                     IconButton(onClick = { onRemoveFavorite(fav) }) {

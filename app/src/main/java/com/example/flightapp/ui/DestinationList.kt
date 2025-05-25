@@ -14,6 +14,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.flightapp.models.Airport
 import com.example.flightapp.models.Favorite
+import com.example.flightapp.ui.theme.AppTypography
+import com.example.flightapp.ui.theme.FlightAppTheme
 
 @Composable
 fun DestinationList(
@@ -25,10 +27,10 @@ fun DestinationList(
 ) {
     Column(modifier = modifier) {
         Text(
-            "✈ Рейсы из ${selectedAirportObj.name} (${selectedAirportObj.iataCode})",
-            style = MaterialTheme.typography.titleMedium
+            "Рейсы из ${selectedAirportObj.name} (${selectedAirportObj.iataCode})",
+            style = AppTypography.titleSmall
         )
-
+        Spacer(modifier = Modifier.height(8.dp))
         LazyColumn {
             items(destinations) { dest ->
                 Column(
@@ -38,9 +40,9 @@ fun DestinationList(
                 ) {
                     Text("DEPART", style = MaterialTheme.typography.labelSmall)
                     Row {
-                        Text(selectedAirportObj.iataCode, style = MaterialTheme.typography.bodyLarge)
+                        Text(selectedAirportObj.iataCode, style = AppTypography.titleLarge)
                         Spacer(Modifier.width(8.dp))
-                        Text(selectedAirportObj.name, style = MaterialTheme.typography.bodySmall)
+                        Text(selectedAirportObj.name)
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
@@ -53,9 +55,9 @@ fun DestinationList(
                         Column {
                             Text("ARRIVE", style = MaterialTheme.typography.labelSmall)
                             Row {
-                                Text(dest.iataCode, style = MaterialTheme.typography.bodyLarge)
+                                Text(dest.iataCode, style = AppTypography.titleLarge)
                                 Spacer(Modifier.width(8.dp))
-                                Text(dest.name, style = MaterialTheme.typography.bodySmall)
+                                Text(dest.name)
                             }
                         }
 
