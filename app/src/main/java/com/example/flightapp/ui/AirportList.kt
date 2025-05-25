@@ -9,12 +9,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.flightapp.models.Airport
-import com.example.flightapp.ui.theme.AppTypography
+import com.example.flightapp.ui.theme.*
+
 
 @Composable
 fun AirportList(
@@ -32,7 +35,10 @@ fun AirportList(
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
                     .clickable { onSelectAirport(airport.iataCode) },
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0x009FCEE7)
+                )
             ) {
                 Row(
                     modifier = Modifier
