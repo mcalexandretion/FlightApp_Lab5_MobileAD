@@ -86,4 +86,11 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
             repo.removeFavorite(fav)
         }
     }
+    fun removeFavoriteByCodes(departureCode: String, destinationCode: String) {
+        val fav = favorites.value.find {
+            it.departureCode == departureCode && it.destinationCode == destinationCode
+        }
+        fav?.let { removeFavorite(it) }
+    }
+
 }

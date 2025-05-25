@@ -3,13 +3,19 @@ package com.example.flightapp.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.flightapp.viewmodel.FlightViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+
+
+
 
 @Composable
 fun FlightSearchScreen(viewModel: FlightViewModel) {
@@ -19,6 +25,8 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
     val favorites by viewModel.favorites.collectAsState()
     val selectedAirport by viewModel.selectedAirport.collectAsState()
     val isShowingFavorites by viewModel.isShowingFavorites.collectAsState()
+
+    val selectedAirportObj = airports.find { it.iataCode == selectedAirport }
 
     Column(
         modifier = Modifier
@@ -89,22 +97,76 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
                 }
             }
 
-            destinations.isNotEmpty() && selectedAirport != null -> {
-                Text("✈ Рейсы из $selectedAirport:", style = MaterialTheme.typography.titleMedium)
+            selectedAirportObj != null && destinations.isNotEmpty() -> {
+                Column {
+                    Text(
+                        "✈ Рейсы из ${selectedAirportObj.name} (${selectedAirportObj.iataCode})",
+                        style = MaterialTheme.typography.titleMedium
+                    )
 
-                LazyColumn {
-                    items(destinations) { dest ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("$selectedAirport → ${dest.iataCode} - ${dest.name}")
-                            Button(onClick = {
-                                viewModel.saveFavorite(selectedAirport!!, dest.iataCode)
-                            }) {
-                                Text("★")
+                    LazyColumn {
+                        items(destinations) { dest ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp)
+                            ) {
+                                Text("DEPART", style = MaterialTheme.typography.labelSmall)
+                                Row {
+                                    Text(
+                                        selectedAirportObj.iataCode,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        selectedAirportObj.name,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text("ARRIVE", style = MaterialTheme.typography.labelSmall)
+                                        Row {
+                                            Text(
+                                                dest.iataCode,
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(
+                                                dest.name,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        }
+                                    }
+
+                                    val isFavorite = favorites.any { it.departureCode == selectedAirportObj.iataCode && it.destinationCode == dest.iataCode }
+
+                                    IconButton(
+                                        onClick = {
+                                            if (isFavorite) {
+                                                viewModel.removeFavoriteByCodes(selectedAirportObj.iataCode, dest.iataCode)
+                                            } else {
+                                                viewModel.saveFavorite(selectedAirportObj.iataCode, dest.iataCode)
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                                            contentDescription = if (isFavorite) "Удалить из избранного" else "Добавить в избранное",
+                                            tint = if (isFavorite) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                                        )
+                                    }
+
+                                }
+
+                                Divider(modifier = Modifier.padding(vertical = 8.dp))
                             }
                         }
                     }
