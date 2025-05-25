@@ -26,8 +26,11 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
     val airports = searchText
         .debounce(300)
         .flatMapLatest { query ->
-            if (query.isBlank()) flowOf(emptyList())
-            else repo.searchAirports(query)
+            if (query.isBlank()) {
+                repo.getAllAirports()
+            } else {
+                repo.searchAirports(query)
+            }
         }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val destinations = selectedAirport
@@ -38,12 +41,8 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
     val favorites = repo.getFavorites()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val isShowingFavorites = combine(
-        searchText,
-        selectedAirport
-    ) { text, selected ->
-        text.isBlank() && selected == null
-    }.stateIn(viewModelScope, SharingStarted.Lazily, true)
+    private val _isShowingFavorites = MutableStateFlow(true)
+    val isShowingFavorites: StateFlow<Boolean> = _isShowingFavorites
 
     private val SEARCH_KEY = stringPreferencesKey("search")
 
@@ -54,7 +53,9 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
     private fun loadSearchQuery() {
         viewModelScope.launch {
             getApplication<Application>().dataStore.data.collect { prefs ->
-                searchText.value = prefs[SEARCH_KEY] ?: ""
+                val savedQuery = prefs[SEARCH_KEY] ?: ""
+                searchText.value = savedQuery
+                _isShowingFavorites.value = savedQuery.isBlank() && _selectedAirport.value == null
             }
         }
     }
@@ -67,6 +68,11 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setAirport(iata: String?) {
         _selectedAirport.value = iata
+        _isShowingFavorites.value = iata == null && searchText.value.isBlank()
+    }
+
+    fun setShowingFavorites(value: Boolean) {
+        _isShowingFavorites.value = value
     }
 
     fun saveFavorite(dep: String, dest: String) {
@@ -74,10 +80,10 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
             repo.addFavorite(Favorite(departureCode = dep, destinationCode = dest))
         }
     }
+
     fun removeFavorite(fav: Favorite) {
         viewModelScope.launch {
             repo.removeFavorite(fav)
         }
     }
-
 }

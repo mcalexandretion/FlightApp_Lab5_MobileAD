@@ -3,13 +3,13 @@ package com.example.flightapp.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.flightapp.viewmodel.FlightViewModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 
 @Composable
 fun FlightSearchScreen(viewModel: FlightViewModel) {
@@ -20,16 +20,26 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
     val selectedAirport by viewModel.selectedAirport.collectAsState()
     val isShowingFavorites by viewModel.isShowingFavorites.collectAsState()
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         OutlinedTextField(
             value = query,
-            onValueChange = {
-                viewModel.searchText.value = it
-                viewModel.saveSearchQuery(it)
-                if (it.isBlank()) viewModel.setAirport(null)
+            onValueChange = { newText ->
+                viewModel.searchText.value = newText
+                viewModel.saveSearchQuery(newText)
+
+                if (newText.isBlank()) {
+                    viewModel.setShowingFavorites(true)
+                    viewModel.setAirport(null)
+                } else {
+                    viewModel.setShowingFavorites(false)
+                    if (selectedAirport != null) {
+                        viewModel.setAirport(null)
+                    }
+                }
             },
             label = { Text("Введите код или название аэропорта") },
             modifier = Modifier.fillMaxWidth(),
@@ -62,12 +72,15 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
                 }
             }
 
-            query.isNotBlank() && destinations.isEmpty() -> {
+            selectedAirport == null && query.isNotBlank() -> {
                 Text("Аэропорты по запросу:", style = MaterialTheme.typography.titleMedium)
                 LazyColumn {
                     items(airports) { airport ->
                         TextButton(
-                            onClick = { viewModel.setAirport(airport.iataCode) },
+                            onClick = {
+                                viewModel.setAirport(airport.iataCode)
+                                viewModel.setShowingFavorites(false)
+                            },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("${airport.iataCode} - ${airport.name}")
@@ -76,8 +89,9 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
                 }
             }
 
-            destinations.isNotEmpty() -> {
+            destinations.isNotEmpty() && selectedAirport != null -> {
                 Text("✈ Рейсы из $selectedAirport:", style = MaterialTheme.typography.titleMedium)
+
                 LazyColumn {
                     items(destinations) { dest ->
                         Row(
