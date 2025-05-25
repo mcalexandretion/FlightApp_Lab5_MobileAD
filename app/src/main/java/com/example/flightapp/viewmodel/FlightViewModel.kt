@@ -1,6 +1,9 @@
 package com.example.flightapp.viewmodel
 
 import android.app.Application
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flightapp.data.FlightDatabase
@@ -8,9 +11,6 @@ import com.example.flightapp.models.Favorite
 import com.example.flightapp.repository.FlightRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 
 val Application.dataStore by preferencesDataStore(name = "settings")
 
@@ -38,6 +38,13 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
     val favorites = repo.getFavorites()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    val isShowingFavorites = combine(
+        searchText,
+        selectedAirport
+    ) { text, selected ->
+        text.isBlank() && selected == null
+    }.stateIn(viewModelScope, SharingStarted.Lazily, true)
+
     private val SEARCH_KEY = stringPreferencesKey("search")
 
     init {
@@ -58,7 +65,7 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun setAirport(iata: String) {
+    fun setAirport(iata: String?) {
         _selectedAirport.value = iata
     }
 
@@ -67,4 +74,10 @@ class FlightViewModel(application: Application) : AndroidViewModel(application) 
             repo.addFavorite(Favorite(departureCode = dep, destinationCode = dest))
         }
     }
+    fun removeFavorite(fav: Favorite) {
+        viewModelScope.launch {
+            repo.removeFavorite(fav)
+        }
+    }
+
 }

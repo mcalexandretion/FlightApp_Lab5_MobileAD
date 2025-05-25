@@ -8,4 +8,6 @@ class FlightRepository(private val db: FlightDatabase) {
     fun getDestinations(from: String) = db.airportDao().getDestinations(from)
     fun getFavorites() = db.favoriteDao().getAllFavorites()
     suspend fun addFavorite(fav: Favorite) = db.favoriteDao().insertFavorite(fav)
+    suspend fun removeFavorite(fav: Favorite) = db.favoriteDao().deleteFavorite(fav)
+
 }

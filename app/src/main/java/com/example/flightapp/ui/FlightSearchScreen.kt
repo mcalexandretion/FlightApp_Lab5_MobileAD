@@ -1,6 +1,5 @@
 package com.example.flightapp.ui
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,61 +8,92 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.flightapp.viewmodel.FlightViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun FlightSearchScreen(viewModel: FlightViewModel) {
     val query by viewModel.searchText.collectAsState()
     val airports by viewModel.airports.collectAsState()
     val destinations by viewModel.destinations.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
+    val selectedAirport by viewModel.selectedAirport.collectAsState()
+    val isShowingFavorites by viewModel.isShowingFavorites.collectAsState()
 
-    Column(Modifier.padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
+
         OutlinedTextField(
             value = query,
             onValueChange = {
                 viewModel.searchText.value = it
                 viewModel.saveSearchQuery(it)
+                if (it.isBlank()) viewModel.setAirport(null)
             },
             label = { Text("Введите код или название аэропорта") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(16.dp))
 
-        if (query.isNotBlank() && destinations.isEmpty()) {
-            Text("Выберите аэропорт:")
-            LazyColumn {
-                items(airports) { airport ->
-                    TextButton(onClick = {
-                        viewModel.setAirport(airport.iataCode)
-                    }) {
-                        Text("${airport.iataCode} - ${airport.name}")
-                    }
-                }
-            }
-        } else if (destinations.isNotEmpty()) {
-            Text("Рейсы из ${viewModel.selectedAirport.value}:")
-            LazyColumn {
-                items(destinations) { dest ->
-                    Row(
-                        Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("${viewModel.selectedAirport.value} → ${dest.iataCode} - ${dest.name}")
-                        Button(onClick = {
-                            viewModel.saveFavorite(viewModel.selectedAirport.value!!, dest.iataCode)
-                        }) {
-                            Text("★")
+        when {
+            isShowingFavorites -> {
+                Text("⭐ Избранные маршруты:", style = MaterialTheme.typography.titleMedium)
+                if (favorites.isEmpty()) {
+                    Text("Нет сохранённых маршрутов.")
+                } else {
+                    LazyColumn {
+                        items(favorites) { fav ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("${fav.departureCode} → ${fav.destinationCode}")
+                                IconButton(onClick = { viewModel.removeFavorite(fav) }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Удалить")
+                                }
+                            }
                         }
                     }
                 }
             }
-        } else {
-            Text("Избранные маршруты:")
-            LazyColumn {
-                items(favorites) {
-                    Text("${it.departureCode} → ${it.destinationCode}")
+
+            query.isNotBlank() && destinations.isEmpty() -> {
+                Text("Аэропорты по запросу:", style = MaterialTheme.typography.titleMedium)
+                LazyColumn {
+                    items(airports) { airport ->
+                        TextButton(
+                            onClick = { viewModel.setAirport(airport.iataCode) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("${airport.iataCode} - ${airport.name}")
+                        }
+                    }
+                }
+            }
+
+            destinations.isNotEmpty() -> {
+                Text("✈ Рейсы из $selectedAirport:", style = MaterialTheme.typography.titleMedium)
+                LazyColumn {
+                    items(destinations) { dest ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("$selectedAirport → ${dest.iataCode} - ${dest.name}")
+                            Button(onClick = {
+                                viewModel.saveFavorite(selectedAirport!!, dest.iataCode)
+                            }) {
+                                Text("★")
+                            }
+                        }
+                    }
                 }
             }
         }
