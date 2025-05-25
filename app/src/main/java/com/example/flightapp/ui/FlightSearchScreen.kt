@@ -14,9 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 
-
-
-
 @Composable
 fun FlightSearchScreen(viewModel: FlightViewModel) {
     val query by viewModel.searchText.collectAsState()
@@ -64,16 +61,63 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
                 } else {
                     LazyColumn {
                         items(favorites) { fav ->
-                            Row(
+                            // Находим объекты аэропортов для отображения названий
+                            val departAirport = airports.find { it.iataCode == fav.departureCode }
+                            val arriveAirport = airports.find { it.iataCode == fav.destinationCode }
+
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .padding(vertical = 8.dp)
                             ) {
-                                Text("${fav.departureCode} → ${fav.destinationCode}")
-                                IconButton(onClick = { viewModel.removeFavorite(fav) }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Удалить")
+                                Text("DEPART", style = MaterialTheme.typography.labelSmall)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Start,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        departAirport?.iataCode ?: fav.departureCode,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        departAirport?.name ?: "",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                Text("ARRIVE", style = MaterialTheme.typography.labelSmall)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Start,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        arriveAirport?.iataCode ?: fav.destinationCode,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        arriveAirport?.name ?: "",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+
+                                // Кнопка удаления избранного справа по центру
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(onClick = { viewModel.removeFavorite(fav) }) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Удалить")
+                                    }
+                                }
+
+                                Divider(modifier = Modifier.padding(vertical = 8.dp))
                             }
                         }
                     }
@@ -163,7 +207,6 @@ fun FlightSearchScreen(viewModel: FlightViewModel) {
                                             tint = if (isFavorite) MaterialTheme.colorScheme.primary else LocalContentColor.current
                                         )
                                     }
-
                                 }
 
                                 Divider(modifier = Modifier.padding(vertical = 8.dp))
